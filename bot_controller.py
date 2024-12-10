@@ -54,3 +54,23 @@ class BotController:
         # Move up and then back to the start
         bot.move_to_relative(0, 0, 10, 0)
         bot.slide_to(center[4], center[5], center[6], center[7])
+
+
+    def draw_triangle (self):
+        bot = self.bot
+        
+        self.__move_bot_to_paper()
+        
+        bot.move_to_relative(40, 80 , 0, 0)
+        bot.move_to_relative(40, -80 , 0, 0)
+        bot.move_to_relative(-80, 0, 0, 0)
+
+    def draw_square (self):
+        bot = self.bot
+        
+        self.__move_bot_to_paper()
+
+        bot.move_to_relative(0, 80 , 0, 0)
+        bot.move_to_relative(80, 0 , 0, 0)
+        bot.move_to_relative(0, -80 , 0, 0)
+        bot.move_to_relative(-80, 0, 0, 0)
