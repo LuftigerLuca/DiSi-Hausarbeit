@@ -20,5 +20,9 @@ Nach zeichnen einer Form in der Luft (Kreis, Dreick), wird dieser durch den Bot 
 - Trainierten Entscheidungsbaum nutzen, also neue Daten klassifizieren und Aktionen ausführen („Inferenz“)
   
 
-## Dateien:
-- Eine Funktion zum einlesen der CSV Daten
+## Wichtige Programmteile:
+- Eine Funktion zum Einlesen der Sensordaten, welche diese auch gleich vorverarbeitet mit Filtern wie Moving Average, Median Filter, etc.
+- Eine Funktion zum Feature Engineering, welche die Sensordaten in ein geeignetes Format für den Entscheidungsbaum bringt.
+- Eine Funktion zum Trainieren des Entscheidungsbaums.
+- Eine Funktion zum Klassifizieren neuer Daten und Ausführen der Aktionen.
+- [x] Eine Funktion zum Zeichnen des Kreises oder Dreiecks. (Haben wir schon gemacht, weil wir Macher sind)
