@@ -120,4 +120,4 @@ def classify_new_file(file_path):
         print(f"Fehler bei der Klassifikation der Datei: {e}")
 
 # Beispielaufruf der Klassifikation
-classify_new_file("datasets/Levi_Triangle2.csv")
+classify_new_file("datasets/Carlo_Triangle.csv")
