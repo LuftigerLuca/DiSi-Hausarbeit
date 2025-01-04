@@ -28,6 +28,15 @@ def plot_filter(data, title):
                       yaxis_title='Werte')
     fig.show()
 
+def mv_filter(dataframe, columns, window_size):
+
+    mfiltered_df = dataframe.copy()
+    for col in columns:
+        mfiltered_df[col] = mfiltered_df[col].rolling(window=window_size, min_periods=1).mean()
+    return mfiltered_df
 
 daten = data_input("/datasets/circle/circle_accelerometer.csv")
 plot_filter(daten, "Input")
+daten2 = daten.copy()
+daten2 = mv_filter(daten2, daten2.columns, 10)
+plot_filter(daten2, "Output nach Moving Average Filter")
