@@ -13,16 +13,16 @@ Nach zeichnen einer Form in der Luft (Kreis, Dreick), wird dieser durch den Bot 
 - Ergebnis muss reproduzierbar sein.
 
 ## Geforderte Programmkomponenten:
-- Sensordaten einlesen und vorverarbeiten/bereinigen
-- Feature Engineering der Sensordaten
-- Entscheidungsbaum trainieren und validieren
+- [x] Sensordaten einlesen und vorverarbeiten/bereinigen
+- [x] Feature Engineering der Sensordaten
+- [x] Entscheidungsbaum trainieren und validieren
 - [x] Programmcode für die Dobot-Aktionen
-- Trainierten Entscheidungsbaum nutzen, also neue Daten klassifizieren und Aktionen ausführen („Inferenz“)
+- [x] Trainierten Entscheidungsbaum nutzen, also neue Daten klassifizieren und Aktionen ausführen („Inferenz“)
   
 
 ## Wichtige Programmteile:
-- Eine Funktion zum Einlesen der Sensordaten, welche diese auch gleich vorverarbeitet mit Filtern wie Moving Average, Median Filter, etc.
-- Eine Funktion zum Feature Engineering, welche die Sensordaten in ein geeignetes Format für den Entscheidungsbaum bringt.
-- Eine Funktion zum Trainieren des Entscheidungsbaums.
-- Eine Funktion zum Klassifizieren neuer Daten und Ausführen der Aktionen.
+- [x] Eine Funktion zum Einlesen der Sensordaten, welche diese auch gleich vorverarbeitet mit Filtern wie Moving Average, Median Filter, etc.
+- [x] Eine Funktion zum Feature Engineering, welche die Sensordaten in ein geeignetes Format für den Entscheidungsbaum bringt.
+- [x]  Funktion zum Trainieren des Entscheidungsbaums.
+- [x] Eine Funktion zum Klassifizieren neuer Daten und Ausführen der Aktionen.
 - [x] Eine Funktion zum Zeichnen des Kreises oder Dreiecks. (Haben wir schon gemacht, weil wir Macher sind)

@@ -4,7 +4,6 @@ import math
 
 sys.path.insert(0, os.path.abspath("."))
 
-from lib.interface import Interface
 from lib.dobot import Dobot
 
 
