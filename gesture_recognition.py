@@ -64,6 +64,7 @@ def extract_features(df):
     """Extracts statistical features from the dataset."""
     features = {}
     for col in df.columns:
+        # Amplitude-based features
         features[f"{col}_mean"] = df[col].mean()
         features[f"{col}_std"] = df[col].std()
         features[f"{col}_max"] = df[col].max()
@@ -71,10 +72,29 @@ def extract_features(df):
         features[f"{col}_range"] = df[col].max() - df[col].min()
         features[f"{col}_median"] = df[col].median()
         features[f"{col}_energy"] = np.sum(df[col] ** 2)
+
+        # Dynamic features
+        features[f"{col}_mean_diff"] = df[col].diff().mean()
+        features[f"{col}_std_diff"] = df[col].diff().std()
+        features[f"{col}_max_diff"] = df[col].diff().max()
+
+        # Frequency-based features
+        fft = np.fft.fft(df[col].values)
+        fft_magnitude = np.abs(fft[:len(fft)//2])  # Take half of the FFT result
+        fft_frequencies = np.fft.fftfreq(len(fft), d=1)[:len(fft)//2]
+        features[f"{col}_dominant_freq"] = fft_frequencies[np.argmax(fft_magnitude)]
+        features[f"{col}_freq_energy"] = np.sum(fft_magnitude ** 2)
+
+        # Correlation if applicable
+        for col2 in df.columns:
+            if col != col2:
+                features[f"{col}_corr_{col2}"] = df[col].corr(df[col2])
+
     return features
 
 # Windowing
-def apply_windowing(df, window_size=50, overlap=25):
+'''Größere Windowsize und Overlap = Mehr einzelne Fenster, dafür aber längere Berechnungszeit'''
+def apply_windowing(df, window_size=25, overlap=24):
     """Splits the data into overlapping windows and extracts features for each window."""
     step = window_size - overlap
     windows = []
