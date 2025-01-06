@@ -12,7 +12,9 @@ class Dobot:
         self.interface.start_queue()
 
         self.interface.set_point_to_point_jump_params(10, 10)
-        self.interface.set_point_to_point_joint_params([50, 50, 50, 50], [50, 50, 50, 50])
+        self.interface.set_point_to_point_joint_params(
+            [50, 50, 50, 50], [50, 50, 50, 50]
+        )
         self.interface.set_point_to_point_coordinate_params(50, 50, 50, 50)
         self.interface.set_point_to_point_common_params(50, 50)
         self.interface.set_point_to_point_jump2_params(5, 5, 5)
@@ -78,7 +80,9 @@ class Dobot:
         self.interface.stop_queue()
         queue_index = None
         for point in path:
-            queue_index = self.interface.set_continous_trajectory_command(1, point[0], point[1], point[2], 50)
+            queue_index = self.interface.set_continous_trajectory_command(
+                1, point[0], point[1], point[2], 50
+            )
         self.interface.start_queue()
         if wait:
             self.wait(queue_index)
@@ -88,7 +92,9 @@ class Dobot:
         self.interface.stop_queue()
         queue_index = None
         for point in path:
-            queue_index = self.interface.set_continous_trajectory_command(0,  point[0], point[1], point[2], 50)
+            queue_index = self.interface.set_continous_trajectory_command(
+                0, point[0], point[1], point[2], 50
+            )
         self.interface.start_queue()
         if wait:
             self.wait(queue_index)

@@ -1,13 +1,35 @@
 from bot_controller import BotController
-
-controller = BotController()
-
-starting_point = controller.request_starting_point()
+from gesture_recognition import GestureRecognition
 
 
-selection = input("Choose Action: \n 1 Homing \n 2 Circle \n 3 Triangle \n 4 Square \n")
-match selection:
-    case "1": controller.homing()
-    case "2": controller.draw_circle(starting_point)
-    case "3": controller.draw_triangle(starting_point)
-    case "4": controller.draw_square(starting_point)
+def main():
+    base_path = "datasets"
+
+    gesture_recognition = GestureRecognition(base_path)
+    bot_controller = BotController()
+
+    while True:
+        file_path = input("Enter the file path for a new gesture or 'q' to quit: ")
+        if file_path.lower() == "q":
+            break
+        execute_command(
+            gesture_recognition.predict_new_gesture(file_path), bot_controller
+        )
+
+
+def execute_command(gesture, bot_controller):
+    match gesture:
+        case "shake":
+            bot_controller.homing()
+        case "circle":
+            bot_controller.draw_circle()
+        case "triangle":
+            bot_controller.draw_triangle()
+        case "square":
+            bot_controller.draw_square()
+        case _:
+            print("Unknown gesture")
+
+
+if __name__ == "__main__":
+    main()

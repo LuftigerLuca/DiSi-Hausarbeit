@@ -1,4 +1,6 @@
 import os
+from collections import Counter
+
 import pandas as pd
 import numpy as np
 from scipy.signal import butter, filtfilt
@@ -7,172 +9,170 @@ from sklearn.tree import DecisionTreeClassifier, export_text
 from sklearn.metrics import classification_report, accuracy_score
 import plotly.graph_objects as go
 
-def plot_filter(data, title, filename=None):
-    """Visualisiert die Daten mit Plotly"""
-    fig = go.Figure()
-    for column in data.columns:
-        fig.add_trace(go.Scatter(x=data.index, y=data[column], mode='lines', name=column))
 
-    # Füge Dateinamen zum Titel hinzu, falls vorhanden
-    plot_title = title
-    if filename:
-        plot_title = f"{title} von {filename}"
+class GestureRecognition:
+    def __init__(self, base_path):
+        X, y = self.load_training_data(base_path)
+        self.clf = self.train_classifier(X, y)
 
-    fig.update_layout(title=plot_title,
-                      xaxis_title='Zeit',
-                      yaxis_title='Werte')
-    fig.show()
+    def plot_filter(self, data, title, filename=None):
+        """Visualizes the import data"""
+        fig = go.Figure()
+        for column in data.columns:
+            fig.add_trace(
+                go.Scatter(x=data.index, y=data[column], mode="lines", name=column)
+            )
 
-# Load and preprocess data
-def load_and_preprocess(file_path):
-    """Loads and preprocesses accelerometer data."""
-    df = pd.read_csv(file_path)
-    '''Welche Reihen sollen analysiert werden?:'''
-    acc_columns = [
-        "Linear Acceleration x (m/s^2)",
-        "Linear Acceleration y (m/s^2)",
-        "Linear Acceleration z (m/s^2)"
-    ]
-    raw_data = df[acc_columns].dropna()
-    ma_data = apply_moving_average(raw_data)
+        # Add title and labels
+        plot_title = title
+        if filename:
+            plot_title = f"{title} von {filename}"
 
-    return ma_data
+        fig.update_layout(title=plot_title, xaxis_title="Zeit", yaxis_title="Werte")
+        fig.show()
 
-# Z-score filter
-def apply_zscore_filter(df):
-    """Removes outliers using Z-score filtering."""
-    z_scores = np.abs((df - df.mean()) / df.std())
-    z_result = df[(z_scores < 3).all(axis=1)]
-    return z_result
+    # Load and preprocess data
+    def load_and_preprocess(self, file_path):
+        """Loads and preprocesses accelerometer data."""
+        df = pd.read_csv(file_path)
+        """Welche Reihen sollen analysiert werden?:"""
+        acc_columns = [
+            "Linear Acceleration x (m/s^2)",
+            "Linear Acceleration y (m/s^2)",
+            "Linear Acceleration z (m/s^2)",
+        ]
+        raw_data = df[acc_columns].dropna()
+        ma_data = self.apply_moving_average(raw_data)
+        z_data = self.apply_zscore_filter(ma_data)
+        lp_data = self.apply_lowpass_filter(z_data)
 
-# Low-pass filter
-def apply_lowpass_filter(df, cutoff=10, fs=100, order=4):
-    nyquist = 0.5 * fs
-    normal_cutoff = cutoff / nyquist
-    b, a = butter(order, normal_cutoff, btype='low', analog=False)
-    lp_result = df.apply(lambda x: filtfilt(b, a, x), axis=0)
-    return lp_result
+        return lp_data
 
-# Moving average filter
-def apply_moving_average(df, window_size=5):
-    """Applies a moving average filter to the data."""
-    ma_result = df.rolling(window=window_size, center=True).mean()
-    return ma_result
+    # Z-score filter
+    def apply_zscore_filter(self, df):
+        """Removes outliers using Z-score filtering."""
+        z_scores = np.abs((df - df.mean()) / df.std())
+        z_result = df[(z_scores < 3).all(axis=1)]
+        return z_result
 
-# Feature extraction
-def extract_features(df):
-    """Extracts statistical features from the dataset."""
-    features = {}
-    for col in df.columns:
-        # Amplitude-based features
-        features[f"{col}_mean"] = df[col].mean()
-        features[f"{col}_std"] = df[col].std()
-        features[f"{col}_max"] = df[col].max()
-        features[f"{col}_min"] = df[col].min()
-        features[f"{col}_range"] = df[col].max() - df[col].min()
-        features[f"{col}_median"] = df[col].median()
-        features[f"{col}_energy"] = np.sum(df[col] ** 2)
+    # Low-pass filter
+    def apply_lowpass_filter(self, df, cutoff=10, fs=100, order=4):
+        nyquist = 0.5 * fs
+        normal_cutoff = cutoff / nyquist
+        b, a = butter(order, normal_cutoff, btype="low", analog=False)
+        lp_result = df.apply(lambda x: filtfilt(b, a, x), axis=0)
+        return lp_result
 
-        # Dynamic features
-        features[f"{col}_mean_diff"] = df[col].diff().mean()
-        features[f"{col}_std_diff"] = df[col].diff().std()
-        features[f"{col}_max_diff"] = df[col].diff().max()
+    # Moving average filter
+    def apply_moving_average(self, df, window_size=5):
+        """Applies a moving average filter to the data."""
+        ma_result = df.rolling(window=window_size, center=True).mean()
+        return ma_result
 
-        # Frequency-based features
-        fft = np.fft.fft(df[col].values)
-        fft_magnitude = np.abs(fft[:len(fft)//2])  # Take half of the FFT result
-        fft_frequencies = np.fft.fftfreq(len(fft), d=1)[:len(fft)//2]
-        features[f"{col}_dominant_freq"] = fft_frequencies[np.argmax(fft_magnitude)]
-        features[f"{col}_freq_energy"] = np.sum(fft_magnitude ** 2)
+    # Feature extraction
+    def extract_features(self, df):
+        """Extracts statistical features from the dataset."""
+        features = {}
+        for col in df.columns:
+            # Amplitude-based features
+            features[f"{col}_mean"] = df[col].mean()
+            features[f"{col}_std"] = df[col].std()
+            features[f"{col}_max"] = df[col].max()
+            features[f"{col}_min"] = df[col].min()
+            features[f"{col}_range"] = df[col].max() - df[col].min()
+            features[f"{col}_median"] = df[col].median()
+            features[f"{col}_energy"] = np.sum(df[col] ** 2)
 
-        # Correlation if applicable
-        for col2 in df.columns:
-            if col != col2:
-                features[f"{col}_corr_{col2}"] = df[col].corr(df[col2])
+            # Dynamic features
+            features[f"{col}_mean_diff"] = df[col].diff().mean()
+            features[f"{col}_std_diff"] = df[col].diff().std()
+            features[f"{col}_max_diff"] = df[col].diff().max()
 
-    return features
+            # Frequency-based features
+            fft = np.fft.fft(df[col].values)
+            fft_magnitude = np.abs(fft[: len(fft) // 2])
+            fft_frequencies = np.fft.fftfreq(len(fft), d=1)[: len(fft) // 2]
+            features[f"{col}_dominant_freq"] = fft_frequencies[np.argmax(fft_magnitude)]
+            features[f"{col}_freq_energy"] = np.sum(fft_magnitude**2)
 
-# Windowing
-'''Größere Windowsize und Overlap = Mehr einzelne Fenster, dafür aber längere Berechnungszeit'''
-def apply_windowing(df, window_size=25, overlap=24):
-    """Splits the data into overlapping windows and extracts features for each window."""
-    step = window_size - overlap
-    windows = []
-    for start in range(0, len(df) - window_size + 1, step):
-        window = df.iloc[start:start + window_size]
-        windows.append(extract_features(window))
-    return pd.DataFrame(windows)
+            for col2 in df.columns:
+                if col != col2:
+                    features[f"{col}_corr_{col2}"] = df[col].corr(df[col2])
 
-# Load training data
-def load_training_data(base_path):
-    """Loads and processes training data from specified directories."""
-    gestures = ["circle", "shake", "triangle"]
-    features, labels = [], []
-    for gesture in gestures:
-        gesture_path = os.path.join(base_path, gesture)
-        for file_name in os.listdir(gesture_path):
-            if file_name.endswith('.csv'):
-                file_path = os.path.join(gesture_path, file_name)
-                df = load_and_preprocess(file_path)
-                windowed_features = apply_windowing(df)
-                features.extend(windowed_features.to_dict(orient='records'))
-                labels.extend([gesture] * len(windowed_features))
-    return pd.DataFrame(features), labels
+        return features
 
-# Train decision tree classifier
-def train_classifier(X, y):
-    """Trains and evaluates a decision tree classifier."""
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    clf = DecisionTreeClassifier(random_state=42)
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    print("Accuracy:", accuracy_score(y_test, y_pred))
-    print(classification_report(y_test, y_pred))
-    return clf
+    # Windowing
+    """Größere Windowsize und Overlap = Mehr einzelne Fenster, dafür aber längere Berechnungszeit"""
 
-# Predict new gesture
-def predict_new_gesture(file_path, clf):
-    """Predicts the class of a new gesture."""
-    if not os.path.exists(file_path):
-        file_path = os.path.join("datasets", file_path)
+    def apply_windowing(self, df, window_size=25, overlap=24):
+        """Splits the data into overlapping windows and extracts features for each window."""
+        step = window_size - overlap
+        windows = []
+        for start in range(0, len(df) - window_size + 1, step):
+            window = df.iloc[start : start + window_size]
+            windows.append(self.extract_features(window))
+        return pd.DataFrame(windows)
 
-    if not os.path.exists(file_path):
-        print("File not found.")
-        return
+    # Load training data
+    def load_training_data(self, base_path):
+        """Loads and processes training data from specified directories."""
+        print("Loading training data...")
+        gestures = ["circle", "shake", "triangle", "square"]
+        features, labels = [], []
+        for gesture in gestures:
+            gesture_path = os.path.join(base_path, gesture)
+            for file_name in os.listdir(gesture_path):
+                if file_name.endswith(".csv"):
+                    file_path = os.path.join(gesture_path, file_name)
+                    df = self.load_and_preprocess(file_path)
+                    windowed_features = self.apply_windowing(df)
+                    features.extend(windowed_features.to_dict(orient="records"))
+                    labels.extend([gesture] * len(windowed_features))
+        return pd.DataFrame(features), labels
 
-    df = pd.read_csv(file_path)
-    acc_columns = [
-        "Linear Acceleration x (m/s^2)",
-        "Linear Acceleration y (m/s^2)",
-        "Linear Acceleration z (m/s^2)"
-    ]
-    raw_data = df[acc_columns].dropna()
-    plot_filter(raw_data, "Input Data")
+    # Train decision tree classifier
+    def train_classifier(self, X, y):
+        """Trains and evaluates a decision tree classifier."""
+        print("Training classifier...")
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.3, random_state=42
+        )
+        clf = DecisionTreeClassifier(random_state=42)
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        print("Accuracy:", accuracy_score(y_test, y_pred))
+        print(classification_report(y_test, y_pred))
+        return clf
 
-    processed_data = load_and_preprocess(file_path)
-    windowed_features = apply_windowing(processed_data)
-    predictions = clf.predict(windowed_features)
-    unique, counts = np.unique(predictions, return_counts=True)
+    def predict_new_gesture(self, file_path):
+        """Predicts the class of a new gesture."""
+        if not os.path.exists(file_path):
+            file_path = os.path.join("datasets", file_path)
 
-    # Anzeigen der Ergebnisse pro Window
-    print("Window predictions:")
-    for u, c in zip(unique, counts):
-        print(f"{u}: {c} windows")
+        if not os.path.exists(file_path):
+            print("File not found.")
+            return
 
-    # Mehrheitliche Abstimmung
-    prediction = unique[np.argmax(counts)]
-    print("Predicted Gesture:", prediction)
-# Main function
-def main():
-    base_path = "datasets"
-    X, y = load_training_data(base_path)
-    clf = train_classifier(X, y)
+        df = pd.read_csv(file_path)
+        acc_columns = [
+            "Linear Acceleration x (m/s^2)",
+            "Linear Acceleration y (m/s^2)",
+            "Linear Acceleration z (m/s^2)",
+        ]
+        raw_data = df[acc_columns].dropna()
+        self.plot_filter(raw_data, "Input Data")
 
-    while True:
-        file_path = input("Enter the file path for a new gesture or 'q' to quit: ")
-        if file_path.lower() == 'q':
-            break
-        predict_new_gesture(file_path, clf)
+        processed_data = self.load_and_preprocess(file_path)
+        windowed_features = self.apply_windowing(processed_data)
+        predictions = self.clf.predict(windowed_features)
 
-if __name__ == "__main__":
-    main()
+        # Anzeigen der Ergebnisse pro Window
+        print("Window predictions:")
+        prediction_counts = Counter(predictions)
+        for gesture, count in prediction_counts.items():
+            print(f"{gesture}: {count} windows")
+
+        # Mehrheitliche Abstimmung
+        majority_vote = prediction_counts.most_common(1)[0][0]
+        print(f"Mehrheitsentscheidung: {majority_vote}")
+        return majority_vote
