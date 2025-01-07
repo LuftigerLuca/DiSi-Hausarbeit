@@ -26,3 +26,15 @@ Nach zeichnen einer Form in der Luft (Kreis, Dreick), wird dieser durch den Bot 
 - [x]  Funktion zum Trainieren des Entscheidungsbaums.
 - [x] Eine Funktion zum Klassifizieren neuer Daten und Ausführen der Aktionen.
 - [x] Eine Funktion zum Zeichnen des Kreises oder Dreiecks. (Haben wir schon gemacht, weil wir Macher sind)
+
+# Änderungen:
+
+- Dateien wie Triangle.csv oder Circle.csv sind 30 Sekunden aufgenommen worden (kontinuierliche Gesture)
+- Dateien wie circle.csv von Luca sind jeweils nur eine Bewegung
+- Neue gesture_recognition ist erstmal als gesture2 gelabelt, falls man die andere noch braucht. Dabei werden nur circle und triangle erkannt.
+- Gleiches für die main
+- Programm schaut nun ob eine gesture_model.plk da ist. Falls nein wird eine neu erstellt. Vorherige vorher löschen falls man das nochmal machen will.
+- Danach lädt er das Model und man kann seine Datei einlesen.
+- Features noch anpassen.
+
+
