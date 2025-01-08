@@ -1,7 +1,7 @@
 from bot_controller import BotController
 from gesture_recognition import GestureRecognition
 
-
+'''main funktion um die gesten zu erkennen. mit dobot ansteuerung'''
 def main():
     base_path = "datasets"
 
@@ -9,7 +9,7 @@ def main():
     bot_controller = BotController()
 
     while True:
-        file_path = input("Enter the file path for a new gesture or 'q' to quit: ")
+        file_path = input("Dateinamen angeben (z.B. dreieck5sec.csv) oder 'q' für quit: ")
         if file_path.lower() == "q":
             break
         execute_command(
@@ -28,7 +28,7 @@ def execute_command(gesture, bot_controller):
         case "square":
             bot_controller.draw_square()
         case _:
-            print("Unknown gesture")
+            print("Keine Geste gefunden")
 
 
 if __name__ == "__main__":
