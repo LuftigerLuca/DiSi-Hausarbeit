@@ -3,10 +3,11 @@ from gesture_recognition import GestureRecognition
 
 homed = False
 
-'''main funktion um die gesten zu erkennen. mit dobot ansteuerung
-    testing = False: wenn True, wird der Bot nicht angesprochen
-'''
 def main(testing=False):
+    """
+    Entry point into the program
+    testing = False: if True, the bot commands will not be executed
+    """
     base_path = "datasets"
 
     gesture_recognition = GestureRecognition(base_path)
@@ -22,6 +23,9 @@ def main(testing=False):
 
 
 def execute_command(gesture, bot_controller):
+    """
+    Based on the recognized gesture, execute the matching dobot command
+    """
     global homed
     if not homed:
         bot_controller.homing()

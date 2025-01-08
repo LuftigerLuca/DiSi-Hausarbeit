@@ -79,9 +79,6 @@ class GestureRecognition:
         for col in df.columns:
             # Core statistical features
             features[f"{col}_mean"] = df[col].mean()
-            features[f"{col}_std"] = df[col].std()
-            features[f"{col}_max"] = df[col].max()
-            features[f"{col}_min"] = df[col].min()
             features[f"{col}_energy"] = np.sum(df[col] ** 2)
             features[f"{col}_mean_diff"] = df[col].diff().mean()
             features[f"{col}_std_diff"] = df[col].diff().std()
